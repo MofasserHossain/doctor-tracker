@@ -1,0 +1,55 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["react", "typescript", "import", "unicorn"],
+  "categories": {
+    "correctness": "error",
+    "suspicious": "warn",
+    "perf": "warn"
+  },
+  "env": {
+    "browser": true,
+    "es2022": true
+  },
+  "settings": {
+    "react": {
+      "version": "19.2.0"
+    }
+  },
+  "ignorePatterns": [
+    ".next",
+    "node_modules",
+    "*.config.js",
+    "*.config.ts",
+    "next.config.ts",
+    "src/components/ui"
+  ],
+  "rules": {
+    "no-console": "error",
+    "curly": "error",
+    "no-unused-vars": "off",
+    "no-undef": "off",
+    "typescript/no-unused-vars": [
+      "error",
+      {
+        "args": "all",
+        "argsIgnorePattern": "^_",
+        "caughtErrors": "all",
+        "caughtErrorsIgnorePattern": "^_",
+        "destructuredArrayIgnorePattern": "^_",
+        "varsIgnorePattern": "^_",
+        "ignoreRestSiblings": true
+      }
+    ],
+    "typescript/no-explicit-any": "warn",
+    "react/rules-of-hooks": "error",
+    "react/exhaustive-deps": "warn",
+    "react/react-in-jsx-scope": "off",
+    "react/only-export-components": "off",
+    "react/jsx-no-target-blank": "error",
+    "react/no-danger": "warn",
+    "import/no-duplicates": "warn",
+    "import/no-unassigned-import": "off",
+    "import/no-self-import": "error",
+    "import/no-cycle": "warn"
+  }
+}

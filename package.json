@@ -1,0 +1,29 @@
+{
+  "name": "doctor-tracker",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Doctor Tracker fullstack assignment with a Next.js frontend and Express MongoDB backend.",
+  "scripts": {
+    "frontend:dev": "npm --prefix frontend run dev",
+    "frontend:build": "npm --prefix frontend run build",
+    "frontend:lint": "npm --prefix frontend run lint",
+    "frontend:format": "npm --prefix frontend run format",
+    "frontend:deadcode": "npm --prefix frontend run deadcode",
+    "frontend:analyze": "npm --prefix frontend run analyze",
+    "backend:dev": "npm --prefix backend run dev",
+    "backend:build": "npm --prefix backend run build",
+    "backend:lint": "npm --prefix backend run lint",
+    "backend:format": "npm --prefix backend run format",
+    "backend:deadcode": "npm --prefix backend run deadcode",
+    "backend:analyze": "npm --prefix backend run analyze",
+    "lint": "npm run frontend:lint && npm run backend:lint",
+    "format": "npm run frontend:format && npm run backend:format",
+    "format:check": "npm --prefix frontend run format:check && npm --prefix backend run format:check",
+    "deadcode": "npm run frontend:deadcode && npm run backend:deadcode",
+    "analyze": "npm run frontend:analyze && npm run backend:analyze"
+  },
+  "engines": {
+    "node": ">=20.19.0",
+    "npm": ">=10.0.0"
+  }
+}

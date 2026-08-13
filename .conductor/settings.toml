@@ -1,0 +1,23 @@
+"$schema" = "https://conductor.build/schemas/settings.repo.schema.json"
+file_include_globs = "frontend/.env.local\nbackend/.env.dev\n"
+
+[scripts]
+archive = "bash ./.conductor/archive.sh"
+setup = "bash ./.conductor/setup.sh"
+
+[[preview_urls]]
+name = "Frontend"
+url = "http://localhost:$CONDUCTOR_PORT"
+
+[scripts.run.app]
+available_in = ["local"]
+run_mode = "concurrent"
+command = "bash ./.conductor/run.sh app"
+default = true
+icon = "play"
+
+[scripts.run.services]
+available_in = ["local"]
+run_mode = "concurrent"
+command = "bash ./.conductor/run.sh services"
+icon = "database"

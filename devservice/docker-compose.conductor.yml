@@ -1,0 +1,15 @@
+services:
+  mongodb:
+    image: mongo:8.0
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: doctor_tracker
+      MONGO_INITDB_ROOT_PASSWORD: doctor_tracker_password
+      MONGO_INITDB_DATABASE: doctor_tracker
+    ports:
+      - "${DOCTOR_TRACKER_MONGO_PORT:-27017}:27017"
+    volumes:
+      - mongodb_data:/data/db
+
+volumes:
+  mongodb_data:
