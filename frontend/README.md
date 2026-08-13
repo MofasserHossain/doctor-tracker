@@ -1,36 +1,105 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Doctor Tracker Frontend
 
-## Getting Started
+Next.js admin dashboard for managing doctors, patients, and Care Guide BD operational metrics. This folder can be deployed as its own frontend repository when the backend API is hosted separately.
 
-First, run the development server:
+## Tech Stack
+
+- Next.js 16 App Router
+- React 19
+- Tailwind CSS v4
+- shadcn UI primitives
+- TanStack Query
+- Axios
+- React Hook Form
+- Zod
+- Recharts
+- lucide-react
+
+## Environment
+
+Create `.env.local` from the example:
+
+```bash
+cp .env.example .env.local
+```
+
+```env
+NEXT_PUBLIC_API_URL=http://localhost:4000/api/v1
+```
+
+For deployment, set `NEXT_PUBLIC_API_URL` to the deployed backend URL plus `/api/v1`.
+
+## Local Development
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```text
+http://localhost:3000
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+The backend API must be running and reachable at `NEXT_PUBLIC_API_URL`.
 
-## Learn More
+Seeded demo credentials from the backend:
 
-To learn more about Next.js, take a look at the following resources:
+```text
+Email: admin@doctortracker.local
+Password: Admin@12345
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Available Scripts
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+npm run dev
+npm run build
+npm run start
+npm run lint
+npm run format
+npm run format:check
+npm run deadcode
+npm run analyze
+```
 
-## Deploy on Vercel
+`npm run analyze` runs linting, formatting checks, and dead-code checks.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## App Structure
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```text
+src/app/              App Router pages
+src/components/       Layout, dashboard, auth, and UI components
+src/config/           Environment helpers
+src/constants/        Route constants
+src/lib/api/          Axios API clients
+src/types/            Shared API and domain types
+```
+
+## Deployment
+
+### Vercel
+
+1. Import this frontend repository or the `frontend/` directory.
+2. Set the framework preset to Next.js.
+3. Set `NEXT_PUBLIC_API_URL` in project environment variables.
+4. Deploy.
+
+### Netlify
+
+Use these build settings:
+
+```text
+Build command: npm run build
+Publish directory: .next
+```
+
+Set `NEXT_PUBLIC_API_URL` before deploying.
