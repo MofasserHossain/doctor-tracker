@@ -1,9 +1,27 @@
+'use client';
+
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { Skeleton } from '@/components/ui/skeleton';
 import { routes } from '@/constants/routes';
-import { Activity, LayoutDashboard, Stethoscope, UsersRound } from 'lucide-react';
+import { useCurrentUserQuery, useLogoutMutation } from '@/lib/services/auth';
+import { cn } from '@/lib/utils';
+import { Activity, LayoutDashboard, LogOut, Stethoscope, UsersRound } from 'lucide-react';
 import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 import type { ReactNode } from 'react';
 
 const navItems = [
@@ -13,6 +31,22 @@ const navItems = [
 ];
 
 export function AppShell({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
+  const router = useRouter();
+  const { data: user, isError, isLoading: isCurrentUserLoading } = useCurrentUserQuery();
+  const logoutMutation = useLogoutMutation({
+    onSettled: () => {
+      router.replace(routes.login);
+    },
+  });
+
+  useEffect(() => {
+    if (isError) {
+      const nextPath = pathname || routes.dashboard;
+      router.replace(`${routes.login}?next=${encodeURIComponent(nextPath)}`);
+    }
+  }, [isError, pathname, router]);
+
   return (
     <div className="bg-background text-foreground min-h-dvh">
       <aside className="bg-card fixed inset-y-0 left-0 hidden w-64 border-r lg:block">
@@ -28,7 +62,12 @@ export function AppShell({ children }: { children: ReactNode }) {
         <Separator />
         <nav className="grid gap-1 p-3">
           {navItems.map((item) => (
-            <Button key={item.href} asChild variant="ghost" className="justify-start gap-3">
+            <Button
+              key={item.href}
+              asChild
+              variant={pathname === item.href ? 'secondary' : 'ghost'}
+              className="justify-start gap-3"
+            >
               <Link href={item.href}>
                 <item.icon className="size-4" aria-hidden="true" />
                 {item.label}
@@ -44,12 +83,56 @@ export function AppShell({ children }: { children: ReactNode }) {
             <p className="text-sm font-semibold">Care Guide BD</p>
             <p className="text-muted-foreground text-xs">Doctor and patient operations</p>
           </div>
-          <Badge variant="secondary">Admin</Badge>
+          <div className="flex items-center gap-2">
+            {isCurrentUserLoading ? (
+              <Skeleton className="h-5 w-20 rounded-4xl" />
+            ) : (
+              <Badge variant="secondary">{user?.name ?? 'Admin'}</Badge>
+            )}
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  aria-label="Sign out"
+                  disabled={logoutMutation.isPending}
+                  size="icon-sm"
+                  variant="ghost"
+                >
+                  <LogOut className="size-4" aria-hidden="true" />
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Sign out?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Your admin permissions for doctor and patient management will end until you sign
+                    in again.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel disabled={logoutMutation.isPending}>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    disabled={logoutMutation.isPending}
+                    onClick={() => logoutMutation.mutate()}
+                  >
+                    {logoutMutation.isPending ? 'Signing out...' : 'Sign out'}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
         </header>
 
         <nav className="bg-background sticky top-16 z-20 grid grid-cols-3 border-b lg:hidden">
           {navItems.map((item) => (
-            <Button key={item.href} asChild variant="ghost" className="h-12 gap-2 rounded-none">
+            <Button
+              key={item.href}
+              asChild
+              variant="ghost"
+              className={cn(
+                'h-12 gap-2 rounded-none',
+                pathname === item.href && 'bg-secondary text-secondary-foreground',
+              )}
+            >
               <Link href={item.href}>
                 <item.icon className="size-4" aria-hidden="true" />
                 <span className="text-xs">{item.label}</span>

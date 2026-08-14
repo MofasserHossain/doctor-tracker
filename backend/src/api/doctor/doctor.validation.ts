@@ -20,8 +20,8 @@ export const getDoctorSchema = z.object({
 });
 
 export const queryDoctorsSchema = z.object({
-  page: commonValidations.page,
   limit: commonValidations.limit,
+  cursor: commonValidations.cursor,
   search: commonValidations.search,
   specialization: z.string().trim().min(1).max(120).optional(),
   hospital: z.string().trim().min(1).max(160).optional(),

@@ -50,6 +50,7 @@
     "import/no-duplicates": "warn",
     "import/no-unassigned-import": "off",
     "import/no-self-import": "error",
-    "import/no-cycle": "warn"
+    "import/no-cycle": "warn",
+    "eslint/no-underscore-dangle": "off"
   }
 }

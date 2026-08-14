@@ -47,7 +47,6 @@ export const getDashboardSummary = async () => {
       },
       { $project: { _id: 0, date: "$_id", count: 1 } },
       { $sort: { date: 1 } },
-      { $limit: 30 },
     ]),
   ]);
 

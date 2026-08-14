@@ -1,9 +1,14 @@
 import { DoctorModel, type Doctor } from "@/api/doctor/doctor.model";
 import { PatientModel } from "@/api/patient/patient.model";
 import ApiError from "@/common/utils/ApiError";
-import { createPaginationMeta, getDateRangeFilter, getPagination } from "@/common/utils/query";
+import {
+  createCursorPage,
+  createPartialMatchRegex,
+  getCursorPagination,
+  getDateRangeFilter,
+} from "@/common/utils/query";
 import httpStatus from "http-status";
-import mongoose, { type QueryFilter, type SortOrder } from "mongoose";
+import mongoose, { type QueryFilter } from "mongoose";
 
 import type {
   CreateDoctorSchemaBodyType,
@@ -17,15 +22,23 @@ const buildDoctorFilter = (query: Partial<QueryDoctorsSchemaType>): QueryFilter<
   const filter: QueryFilter<Doctor> = {};
 
   if (query.search) {
-    filter.$text = { $search: query.search };
+    const search = createPartialMatchRegex(query.search);
+
+    filter.$or = [
+      { name: search },
+      { specialization: search },
+      { hospital: search },
+      { email: search },
+      { phone: search },
+    ];
   }
 
   if (query.specialization) {
-    filter.specialization = query.specialization;
+    filter.specialization = createPartialMatchRegex(query.specialization);
   }
 
   if (query.hospital) {
-    filter.hospital = query.hospital;
+    filter.hospital = createPartialMatchRegex(query.hospital);
   }
 
   const createdAtRange = getDateRangeFilter(query.from, query.to);
@@ -42,22 +55,18 @@ export const createDoctor = async (doctorData: CreateDoctorSchemaBodyType) => {
 };
 
 export const queryDoctors = async (query: Partial<QueryDoctorsSchemaType>) => {
-  const { page, limit, skip } = getPagination(query);
-  const filter = buildDoctorFilter(query);
-  const sort: Record<string, SortOrder | { $meta: "textScore" }> = query.search
-    ? { score: { $meta: "textScore" as const }, createdAt: -1 as const }
-    : { createdAt: -1 as const };
-  const projection = query.search ? { score: { $meta: "textScore" } } : undefined;
+  const { cursor, limit } = getCursorPagination(query);
+  const baseFilter = buildDoctorFilter(query);
+  const cursorFilter: QueryFilter<Doctor> | undefined = cursor
+    ? { _id: { $lt: new Types.ObjectId(cursor) } }
+    : undefined;
+  const filter: QueryFilter<Doctor> = cursorFilter ? { $and: [baseFilter, cursorFilter] } : baseFilter;
+  const doctors = await DoctorModel.find(filter)
+    .sort({ _id: -1 })
+    .limit(limit + 1)
+    .lean();
 
-  const [records, total] = await Promise.all([
-    DoctorModel.find(filter, projection).sort(sort).skip(skip).limit(limit).lean(),
-    DoctorModel.countDocuments(filter),
-  ]);
-
-  return {
-    records,
-    meta: createPaginationMeta({ page, limit, total }),
-  };
+  return createCursorPage(doctors, limit);
 };
 
 export const getDoctorById = async (id: string) => {

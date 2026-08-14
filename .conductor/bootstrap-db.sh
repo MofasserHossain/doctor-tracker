@@ -59,6 +59,28 @@ main().catch(async (error) => {
 NODE
 }
 
+get_patient_count() {
+  run_backend_node <<'NODE'
+require("dotenv").config({ path: ".env.dev", quiet: true });
+const mongoose = require("mongoose");
+
+async function main() {
+  await mongoose.connect(process.env.MONGODB_URI, { serverSelectionTimeoutMS: 1000 });
+  const count = await mongoose.connection.db.collection("patients").countDocuments();
+  await mongoose.disconnect();
+  console.log(String(count));
+}
+
+main().catch(async (error) => {
+  if (mongoose.connection.readyState !== 0) {
+    await mongoose.disconnect();
+  }
+  console.error(error.message);
+  process.exit(1);
+});
+NODE
+}
+
 printf '%s\n' "Checking MongoDB connection..."
 for attempt in $(seq 1 60); do
   if check_mongodb_ready >/dev/null 2>&1; then
@@ -88,11 +110,12 @@ case "$seed_mode" in
     ;;
   auto)
     user_count="$(get_user_count)"
-    if [ "$user_count" = "0" ]; then
-      printf '%s\n' "Database has no users; running seed data..."
+    patient_count="$(get_patient_count)"
+    if [ "$user_count" = "0" ] || [ "$patient_count" -lt 30 ]; then
+      printf '%s\n' "Database has users=$user_count patients=$patient_count; running seed data..."
       npm --prefix backend run db:seed
     else
-      printf '%s\n' "Database already has $user_count users; skipping seed."
+      printf '%s\n' "Database already has users=$user_count patients=$patient_count; skipping seed."
     fi
     ;;
 esac

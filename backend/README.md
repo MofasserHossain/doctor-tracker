@@ -31,6 +31,8 @@ CORS_ORIGIN=http://localhost:3000
 MONGODB_URI=mongodb://doctor_tracker:doctor_tracker_password@127.0.0.1:27017/doctor_tracker?authSource=admin
 JWT_SECRET=replace-with-a-long-random-secret-at-least-32-characters
 JWT_ACCESS_EXPIRATION_MINUTES=1440
+COOKIE_DOMAIN=
+COOKIE_SAME_SITE=lax
 BCRYPT_SALT_ROUNDS=12
 AUTH_RATE_LIMIT_MAX=30
 AUTH_RATE_LIMIT_WINDOW_MS=900000
@@ -143,13 +145,13 @@ DELETE /api/v1/patients/:id
 Doctor list supports:
 
 ```text
-search, specialization, hospital, from, to, page, limit
+search, specialization, hospital, from, to, cursor, limit
 ```
 
 Patient list supports:
 
 ```text
-search, doctorId, condition, status, from, to, page, limit
+search, doctorId, condition, status, from, to, cursor, limit
 ```
 
 ## Response Shape
@@ -165,7 +167,7 @@ Successful responses use a consistent service response wrapper:
 }
 ```
 
-List responses include pagination metadata in `data.meta`.
+List responses include cursor pagination metadata in `data.meta`: `limit`, `nextCursor`, and `hasNextPage`.
 
 ## Deployment
 
@@ -188,6 +190,8 @@ CORS_ORIGIN=<deployed frontend URL>
 MONGODB_URI=<MongoDB Atlas or hosted MongoDB URI>
 JWT_SECRET=<long random secret>
 JWT_ACCESS_EXPIRATION_MINUTES=1440
+COOKIE_DOMAIN=<optional parent domain for same-site subdomains>
+COOKIE_SAME_SITE=<lax for same-site subdomains, none for different root domains over HTTPS>
 BCRYPT_SALT_ROUNDS=12
 AUTH_RATE_LIMIT_MAX=30
 AUTH_RATE_LIMIT_WINDOW_MS=900000
