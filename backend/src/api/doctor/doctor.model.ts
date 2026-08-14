@@ -52,8 +52,7 @@ const doctorSchema = new Schema<Doctor>(
 );
 
 doctorSchema.index({ name: "text", specialization: "text", hospital: "text", email: "text", phone: "text" });
-doctorSchema.index({ createdAt: -1 });
-doctorSchema.index({ specialization: 1, createdAt: -1 });
-doctorSchema.index({ hospital: 1, createdAt: -1 });
+doctorSchema.index({ specialization: 1, _id: -1 });
+doctorSchema.index({ hospital: 1, _id: -1 });
 
 export const DoctorModel = (models.Doctor as Model<Doctor> | undefined) ?? model<Doctor>("Doctor", doctorSchema);

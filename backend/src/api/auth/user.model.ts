@@ -1,7 +1,7 @@
 import mongoose, { type Model } from "mongoose";
 
-const userRoles = ["ADMIN"] as const;
-export type UserRole = (typeof userRoles)[number];
+const USER_ROLES = ["ADMIN"] as const;
+export type UserRole = (typeof USER_ROLES)[number];
 const { model, models, Schema } = mongoose;
 
 export type User = {
@@ -37,7 +37,7 @@ const userSchema = new Schema<User>(
     },
     role: {
       type: String,
-      enum: userRoles,
+      enum: USER_ROLES,
       default: "ADMIN",
       index: true,
     },

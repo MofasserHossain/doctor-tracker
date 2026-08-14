@@ -19,6 +19,11 @@ export const env = cleanEnv(process.env, {
   MONGODB_URI: str({ devDefault: testOnly("mongodb://127.0.0.1:27017/doctor_tracker") }),
   JWT_SECRET: str({ devDefault: testOnly("dev-only-secret-change-before-production-32chars") }),
   JWT_ACCESS_EXPIRATION_MINUTES: num({ devDefault: testOnly(1440) }),
+  COOKIE_DOMAIN: str({ default: "" }),
+  COOKIE_SAME_SITE: str({
+    default: "lax",
+    choices: ["lax", "strict", "none"],
+  }),
   BCRYPT_SALT_ROUNDS: num({ default: 12, devDefault: 4 }),
   AUTH_RATE_LIMIT_MAX: num({ default: 30, devDefault: 500 }),
   AUTH_RATE_LIMIT_WINDOW_MS: num({ default: 900000, devDefault: 900000 }),

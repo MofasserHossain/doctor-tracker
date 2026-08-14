@@ -85,8 +85,9 @@ const patientSchema = new Schema<Patient>(
 );
 
 patientSchema.index({ name: "text", phone: "text", email: "text", condition: "text", status: "text" });
-patientSchema.index({ doctorId: 1, visitDate: -1 });
-patientSchema.index({ condition: 1, visitDate: -1 });
-patientSchema.index({ createdAt: -1 });
+patientSchema.index({ doctorId: 1, _id: -1 });
+patientSchema.index({ condition: 1, _id: -1 });
+patientSchema.index({ status: 1, _id: -1 });
+patientSchema.index({ visitDate: -1 });
 
 export const PatientModel = (models.Patient as Model<Patient> | undefined) ?? model<Patient>("Patient", patientSchema);

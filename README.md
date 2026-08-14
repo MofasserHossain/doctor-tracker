@@ -18,8 +18,8 @@ If this repository is submitted as a monorepo, the frontend source is in `fronte
 ## Features
 
 - Admin authentication with JWT bearer/cookie support.
-- Doctor CRUD with search, filter, and pagination-ready query handling.
-- Patient CRUD with doctor assignment, patient filtering, search, and pagination-ready query handling.
+- Doctor CRUD with search, filter, and cursor pagination.
+- Patient CRUD with doctor assignment, patient filtering, search, and cursor pagination.
 - Doctor detail API for listing patients under a selected doctor.
 - Dashboard summary API with totals, patients per doctor, condition distribution, and date-based statistics.
 - Responsive admin UI built with Next.js, shadcn UI primitives, TanStack Query, React Hook Form, Zod, Recharts, and lucide icons.
@@ -88,6 +88,8 @@ CORS_ORIGIN=http://localhost:3000
 MONGODB_URI=mongodb://doctor_tracker:doctor_tracker_password@127.0.0.1:27017/doctor_tracker?authSource=admin
 JWT_SECRET=replace-with-a-long-random-secret-at-least-32-characters
 JWT_ACCESS_EXPIRATION_MINUTES=1440
+COOKIE_DOMAIN=
+COOKIE_SAME_SITE=lax
 BCRYPT_SALT_ROUNDS=12
 AUTH_RATE_LIMIT_MAX=30
 AUTH_RATE_LIMIT_WINDOW_MS=900000
@@ -202,7 +204,7 @@ The assignment asks for independent frontend and backend deliverables, so the im
 
 ### 2. Service-layer querying with Mongoose indexes
 
-Doctor and patient search/filter/pagination behavior is handled in backend service modules instead of being spread across controllers. The Mongoose schemas define text and compound indexes for common access paths such as doctor specialization, hospital, patient condition, doctor-patient lookups, and visit-date ordering. This gives the UI simple query parameters while keeping database-specific optimization in one backend layer.
+Doctor and patient search/filter/cursor-pagination behavior is handled in backend service modules instead of being spread across controllers. The Mongoose schemas define text and compound indexes for common access paths such as doctor specialization, hospital, patient condition, doctor-patient lookups, and date filtering. List endpoints use a MongoDB ObjectId cursor with `limit + 1` fetching so the API can return a `nextCursor` without leaking the extra sentinel row to the UI.
 
 ## Visual Evidence
 
@@ -235,4 +237,5 @@ The repository uses `oxlint` for linting, `oxfmt` for formatting, and `knip` for
 
 - Frontend: set `NEXT_PUBLIC_API_URL` to the deployed backend API origin plus `/api/v1`.
 - Backend: set `NODE_ENV=production`, `MONGODB_URI`, `JWT_SECRET`, and `CORS_ORIGIN` for the deployed frontend origin.
+- Auth cookies are `HttpOnly`. For different root domains, use HTTPS and set `COOKIE_SAME_SITE=none`; for same-site subdomains, `COOKIE_SAME_SITE=lax` is preferred. Set `COOKIE_DOMAIN` only when sharing a cookie across subdomains of the same parent domain.
 - Seed the first admin user before submitting or create an equivalent production admin account.

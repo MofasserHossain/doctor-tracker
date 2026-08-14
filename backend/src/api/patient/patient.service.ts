@@ -1,9 +1,14 @@
 import { DoctorModel } from "@/api/doctor/doctor.model";
 import { PatientModel, type Patient } from "@/api/patient/patient.model";
 import ApiError from "@/common/utils/ApiError";
-import { createPaginationMeta, getDateRangeFilter, getPagination } from "@/common/utils/query";
+import {
+  createCursorPage,
+  createPartialMatchRegex,
+  getCursorPagination,
+  getDateRangeFilter,
+} from "@/common/utils/query";
 import httpStatus from "http-status";
-import mongoose, { type QueryFilter, type SortOrder } from "mongoose";
+import mongoose, { type QueryFilter } from "mongoose";
 
 import type {
   CreatePatientSchemaBodyType,
@@ -17,7 +22,16 @@ const buildPatientFilter = (query: Partial<QueryPatientsSchemaType>): QueryFilte
   const filter: QueryFilter<Patient> = {};
 
   if (query.search) {
-    filter.$text = { $search: query.search };
+    const search = createPartialMatchRegex(query.search);
+
+    filter.$or = [
+      { name: search },
+      { phone: search },
+      { email: search },
+      { condition: search },
+      { status: search },
+      { notes: search },
+    ];
   }
 
   if (query.doctorId) {
@@ -56,27 +70,19 @@ export const createPatient = async (patientData: CreatePatientSchemaBodyType & {
 };
 
 export const queryPatients = async (query: Partial<QueryPatientsSchemaType>) => {
-  const { page, limit, skip } = getPagination(query);
-  const filter = buildPatientFilter(query);
-  const sort: Record<string, SortOrder | { $meta: "textScore" }> = query.search
-    ? { score: { $meta: "textScore" as const }, visitDate: -1 as const }
-    : { visitDate: -1 as const, createdAt: -1 as const };
-  const projection = query.search ? { score: { $meta: "textScore" } } : undefined;
+  const { cursor, limit } = getCursorPagination(query);
+  const baseFilter = buildPatientFilter(query);
+  const cursorFilter: QueryFilter<Patient> | undefined = cursor
+    ? { _id: { $lt: new Types.ObjectId(cursor) } }
+    : undefined;
+  const filter: QueryFilter<Patient> = cursorFilter ? { $and: [baseFilter, cursorFilter] } : baseFilter;
+  const patients = await PatientModel.find(filter)
+    .populate("doctorId", "name specialization hospital")
+    .sort({ _id: -1 })
+    .limit(limit + 1)
+    .lean();
 
-  const [records, total] = await Promise.all([
-    PatientModel.find(filter, projection)
-      .populate("doctorId", "name specialization hospital")
-      .sort(sort)
-      .skip(skip)
-      .limit(limit)
-      .lean(),
-    PatientModel.countDocuments(filter),
-  ]);
-
-  return {
-    records,
-    meta: createPaginationMeta({ page, limit, total }),
-  };
+  return createCursorPage(patients, limit);
 };
 
 export const getPatientById = async (id: string) => {

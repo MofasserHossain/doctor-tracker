@@ -1,40 +1,58 @@
-export type PaginationOptions = {
-  page?: number | string;
+export type CursorPaginationOptions = {
+  cursor?: string;
   limit?: number | string;
 };
 
-export type PaginationMeta = {
-  page: number;
+export type CursorPaginationMeta = {
   limit: number;
-  total: number;
-  totalPages: number;
+  nextCursor: string | null;
   hasNextPage: boolean;
-  hasPreviousPage: boolean;
 };
 
-export const getPagination = (options: PaginationOptions) => {
-  const page = Math.max(Number(options.page ?? 1), 1);
+type CursorRecord = { _id: unknown };
+
+export const getCursorPagination = (options: CursorPaginationOptions) => {
   const limit = Math.min(Math.max(Number(options.limit ?? 10), 1), 100);
-  const skip = (page - 1) * limit;
+  const cursor = options.cursor;
 
-  return { page, limit, skip };
+  return { cursor, limit };
 };
 
-export const createPaginationMeta = (options: { page: number; limit: number; total: number }): PaginationMeta => {
-  const totalPages = Math.max(Math.ceil(options.total / options.limit), 1);
+const createCursorPaginationMeta = (options: {
+  limit: number;
+  hasNextPage: boolean;
+  nextCursor: string | null;
+}): CursorPaginationMeta => {
+  return {
+    limit: options.limit,
+    nextCursor: options.nextCursor,
+    hasNextPage: options.hasNextPage,
+  };
+};
+
+const createNextCursor = (record: CursorRecord) => {
+  return String(record._id);
+};
+
+export const createCursorPage = <T extends CursorRecord>(records: T[], limit: number) => {
+  const hasNextPage = records.length > limit;
+  const pageRecords = hasNextPage ? records.slice(0, limit) : records;
+  const lastRecord = pageRecords.at(-1);
 
   return {
-    page: options.page,
-    limit: options.limit,
-    total: options.total,
-    totalPages,
-    hasNextPage: options.page < totalPages,
-    hasPreviousPage: options.page > 1,
+    records: pageRecords,
+    meta: createCursorPaginationMeta({
+      limit,
+      hasNextPage,
+      nextCursor: hasNextPage && lastRecord ? createNextCursor(lastRecord) : null,
+    }),
   };
 };
 
 export const getDateRangeFilter = (from?: string, to?: string) => {
-  if (!from && !to) return undefined;
+  if (!from && !to) {
+    return undefined;
+  }
 
   const range: { $gte?: Date; $lte?: Date } = {};
 
@@ -47,4 +65,12 @@ export const getDateRangeFilter = (from?: string, to?: string) => {
   }
 
   return range;
+};
+
+const escapeRegExp = (value: string) => {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+};
+
+export const createPartialMatchRegex = (value: string) => {
+  return new RegExp(escapeRegExp(value.trim()), "i");
 };

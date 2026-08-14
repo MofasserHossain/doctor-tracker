@@ -35,8 +35,8 @@ export const doctorPatientParamsSchema = z.object({
 });
 
 export const queryPatientsSchema = z.object({
-  page: commonValidations.page,
   limit: commonValidations.limit,
+  cursor: commonValidations.cursor,
   search: commonValidations.search,
   doctorId: commonValidations.objectId.optional(),
   condition: z.enum(PATIENT_CONDITIONS).optional(),
