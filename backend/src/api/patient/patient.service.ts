@@ -96,7 +96,7 @@ export const updatePatientById = async (id: string, updateBody: UpdatePatientSch
       ...updateBody,
       email: updateBody.email || undefined,
     },
-    { new: true, runValidators: true }
+    { returnDocument: "after", runValidators: true }
   )
     .populate("doctorId", "name specialization hospital")
     .lean();

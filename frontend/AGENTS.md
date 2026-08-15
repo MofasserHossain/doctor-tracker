@@ -17,6 +17,8 @@ Follow the root `AGENTS.md` conventions.
 ```bash
 npm run dev
 npm run build
+npm run test
+npm run test:watch
 npm run lint
 npm run lint:fix
 npm run format
