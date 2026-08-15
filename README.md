@@ -31,9 +31,8 @@ If this repository is submitted as a monorepo, the frontend source is in `fronte
 .
 ├── frontend/      # Next.js admin UI
 ├── backend/       # Express REST API with MongoDB/Mongoose
-├── devservice/    # Local and Conductor Docker Compose files
+├── devservice/    # Local Docker Compose files
 ├── docs/          # Submission screenshots and supporting documentation assets
-└── .conductor/    # Conductor setup/run/archive scripts
 ```
 
 Each application also has its own README:
@@ -145,20 +144,6 @@ Frontend app:
 http://localhost:3000
 ```
 
-### Conductor Shortcut
-
-Conductor can allocate ports, start MongoDB, write local env files, seed the database, and launch both apps:
-
-```bash
-bash ./.conductor/run.sh app
-```
-
-Use `services` mode when only MongoDB and env setup are needed:
-
-```bash
-bash ./.conductor/run.sh services
-```
-
 ## API Overview
 
 All protected routes require an authenticated admin.
@@ -203,7 +188,7 @@ The frontend owns the admin experience, routing, forms, table screens, dashboard
 
 ### 1. Separate frontend and backend applications
 
-The assignment asks for independent frontend and backend deliverables, so the implementation keeps Next.js and Express as separate applications even though they live in one development workspace. This keeps deployment flexible: the frontend can be deployed to Vercel or Netlify, while the backend can be deployed to Render, Vercel serverless functions, or a VPS. It also keeps the REST API usable from the interview environment, Postman, or any future client without coupling it to Next.js route handlers.
+The assignment asks for independent frontend and backend deliverables, so the implementation keeps Next.js and Express as separate applications even though they live in one monorepo. This keeps deployment flexible: the frontend can be deployed to Vercel or Netlify, while the backend can be deployed to Render, Vercel serverless functions, or a VPS. It also keeps the REST API usable from the interview environment, Postman, or any future client without coupling it to Next.js route handlers.
 
 ### 2. Service-layer querying with Mongoose indexes
 
