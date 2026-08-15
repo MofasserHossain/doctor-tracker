@@ -1,7 +1,8 @@
+import { pathToFileURL } from "node:url";
+
 import { UserModel, type UserRole } from "@/api/auth/user.model";
 import { DoctorModel } from "@/api/doctor/doctor.model";
 import { PatientModel } from "@/api/patient/patient.model";
-import { connectToDatabase, disconnectFromDatabase } from "@/common/db/db";
 import { env } from "@/common/utils/envConfig";
 import { hash } from "bcryptjs";
 
@@ -565,9 +566,7 @@ const patientSeeds = [
   },
 ];
 
-const main = async () => {
-  await connectToDatabase();
-
+export const seedDatabase = async () => {
   const passwordHash = await hash(adminCredentials.password, env.BCRYPT_SALT_ROUNDS);
 
   await UserModel.updateOne(
@@ -619,15 +618,32 @@ const main = async () => {
     )
   );
 
-  await disconnectFromDatabase();
-
-  console.info("Seed completed");
-  console.info(`Admin email: ${adminCredentials.email}`);
-  console.info(`Admin password: ${adminCredentials.password}`);
+  return {
+    adminEmail: adminCredentials.email,
+    doctorCount: doctors.length,
+    patientCount: patients.length,
+  };
 };
 
-void main().catch(async (error) => {
-  console.error(error);
-  await disconnectFromDatabase();
-  process.exit(1);
-});
+const runCliSeed = async () => {
+  const { connectToDatabase, disconnectFromDatabase } = await import("@/common/db/db");
+
+  await connectToDatabase();
+
+  try {
+    const result = await seedDatabase();
+
+    console.info("Seed completed");
+    console.info(`Admin email: ${result.adminEmail}`);
+    console.info(`Admin password: ${adminCredentials.password}`);
+  } finally {
+    await disconnectFromDatabase();
+  }
+};
+
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  void runCliSeed().catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
+}
