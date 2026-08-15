@@ -58,6 +58,9 @@ npm --prefix frontend install
 npm --prefix backend install
 ```
 
+This repository intentionally does not use a root `package.json`. Run npm scripts through the
+individual app folders with `npm --prefix frontend ...` or `npm --prefix backend ...`.
+
 ### 2. Configure Environment Files
 
 Create the frontend env file:
@@ -221,14 +224,22 @@ Mobile dashboard:
 Run all configured static checks:
 
 ```bash
-npm run analyze
+npm --prefix frontend run analyze
+npm --prefix backend run analyze
+```
+
+Run automated tests:
+
+```bash
+npm --prefix frontend run test
+npm --prefix backend run test
 ```
 
 Run production builds:
 
 ```bash
-npm run frontend:build
-npm run backend:build
+npm --prefix frontend run build
+npm --prefix backend run build
 ```
 
 The repository uses `oxlint` for linting, `oxfmt` for formatting, and `knip` for dead-code checks in both applications.

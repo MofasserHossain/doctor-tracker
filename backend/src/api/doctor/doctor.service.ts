@@ -74,7 +74,10 @@ export const getDoctorById = async (id: string) => {
 };
 
 export const updateDoctorById = async (id: string, updateBody: UpdateDoctorSchemaBodyType) => {
-  const doctor = await DoctorModel.findByIdAndUpdate(id, updateBody, { new: true, runValidators: true }).lean();
+  const doctor = await DoctorModel.findByIdAndUpdate(id, updateBody, {
+    returnDocument: "after",
+    runValidators: true,
+  }).lean();
 
   if (!doctor) {
     throw new ApiError(httpStatus.NOT_FOUND, "Doctor not found");

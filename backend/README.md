@@ -100,6 +100,8 @@ http://localhost:4000/api/v1
 npm run dev
 npm run build
 npm run start
+npm run test
+npm run test:watch
 npm run lint
 npm run format
 npm run format:check

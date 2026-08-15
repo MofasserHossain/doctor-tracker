@@ -19,27 +19,23 @@ Use the closest app-level instruction file before editing code:
 
 `CLAUDE.md` files are symlinks to the sibling `AGENTS.md` files so Claude Code and Codex read the same guidance without duplicated content.
 
-## Root Commands
-
-```bash
-npm run lint
-npm run format
-npm run format:check
-npm run deadcode
-npm run analyze
-```
+There is intentionally no root `package.json`; use app-level npm commands only.
 
 ## App Commands
 
 ```bash
 npm --prefix frontend run dev
 npm --prefix frontend run build
+npm --prefix frontend run test
+npm --prefix frontend run test:watch
 npm --prefix frontend run lint
 npm --prefix frontend run format
 npm --prefix frontend run deadcode
 
 npm --prefix backend run dev
 npm --prefix backend run build
+npm --prefix backend run test
+npm --prefix backend run test:watch
 npm --prefix backend run lint
 npm --prefix backend run format
 npm --prefix backend run deadcode

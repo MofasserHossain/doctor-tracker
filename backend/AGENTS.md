@@ -8,6 +8,8 @@ Follow the root `AGENTS.md` conventions.
 npm run dev
 npm run build
 npm run start
+npm run test
+npm run test:watch
 npm run lint
 npm run lint:fix
 npm run format
