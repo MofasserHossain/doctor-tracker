@@ -5,12 +5,15 @@ import doctorRouter from "@/api/doctor/doctor.router";
 import healthCheckRouter from "@/api/healthCheck/healthCheckRouter";
 import patientRouter from "@/api/patient/patient.router";
 import seedRouter from "@/api/seed/seed.router";
+import { databaseConnectionMiddleware } from "@/common/db/db";
 import { apiRateLimit } from "@/common/middleware/security";
 import { Router } from "express";
 
 const apiRouter = Router();
 
 apiRouter.use("/health-check", healthCheckRouter);
+
+apiRouter.use(databaseConnectionMiddleware);
 apiRouter.use("/auth", authRouter);
 apiRouter.use("/seed", seedRouter);
 
