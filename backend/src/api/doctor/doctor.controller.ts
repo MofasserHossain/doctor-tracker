@@ -14,6 +14,7 @@ import httpStatus from "http-status";
 import type {
   CreateDoctorSchemaBodyType,
   GetDoctorType,
+  QueryDoctorPatientsSchemaType,
   QueryDoctorsSchemaType,
   UpdateDoctorSchemaBodyType,
 } from "./doctor.validation";
@@ -45,9 +46,12 @@ export const getDoctorByIds = async (req: Request<GetDoctorType>, res: Response)
   return handleServiceResponse(serviceResponse, res);
 };
 
-export const getPatientsByDoctor = async (req: Request<GetDoctorType>, res: Response) => {
-  const patients = await getDoctorPatients(req.params.id);
-  const serviceResponse = ServiceResponse.success("Doctor patients fetched successfully", patients);
+export const getPatientsByDoctor = async (
+  req: Request<GetDoctorType, unknown, unknown, Partial<QueryDoctorPatientsSchemaType>>,
+  res: Response
+) => {
+  const result = await getDoctorPatients(req.params.id, req.query);
+  const serviceResponse = ServiceResponse.success("Doctor patients fetched successfully", result);
   return handleServiceResponse(serviceResponse, res);
 };
 

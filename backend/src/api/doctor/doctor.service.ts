@@ -1,5 +1,5 @@
 import { DoctorModel, type Doctor } from "@/api/doctor/doctor.model";
-import { PatientModel } from "@/api/patient/patient.model";
+import { PatientModel, type Patient } from "@/api/patient/patient.model";
 import ApiError from "@/common/utils/ApiError";
 import {
   createCursorPage,
@@ -12,6 +12,7 @@ import mongoose, { type QueryFilter } from "mongoose";
 
 import type {
   CreateDoctorSchemaBodyType,
+  QueryDoctorPatientsSchemaType,
   QueryDoctorsSchemaType,
   UpdateDoctorSchemaBodyType,
 } from "./doctor.validation";
@@ -103,12 +104,23 @@ export const deleteDoctorById = async (id: string) => {
   return doctor;
 };
 
-export const getDoctorPatients = async (doctorId: string) => {
+export const getDoctorPatients = async (doctorId: string, query: Partial<QueryDoctorPatientsSchemaType> = {}) => {
   const doctorExists = await DoctorModel.exists({ _id: doctorId });
 
   if (!doctorExists) {
     throw new ApiError(httpStatus.NOT_FOUND, "Doctor not found");
   }
 
-  return await PatientModel.find({ doctorId }).sort({ visitDate: -1, createdAt: -1 }).lean();
+  const { cursor, limit } = getCursorPagination(query);
+  const baseFilter: QueryFilter<Patient> = { doctorId: new Types.ObjectId(doctorId) };
+  const cursorFilter: QueryFilter<Patient> | undefined = cursor
+    ? { _id: { $lt: new Types.ObjectId(cursor) } }
+    : undefined;
+  const filter: QueryFilter<Patient> = cursorFilter ? { $and: [baseFilter, cursorFilter] } : baseFilter;
+  const patients = await PatientModel.find(filter)
+    .sort({ _id: -1 })
+    .limit(limit + 1)
+    .lean();
+
+  return createCursorPage(patients, limit);
 };

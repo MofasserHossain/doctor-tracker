@@ -2,6 +2,7 @@
 
 import { DoctorFormDialog } from '@/components/doctors/doctor-form-dialog';
 import { DoctorPatientsDialog } from '@/components/doctors/doctor-patients-dialog';
+import { DeleteConfirmationDialog } from '@/components/shared/delete-confirmation-dialog';
 import { PaginationControls } from '@/components/shared/pagination-controls';
 import { TableSkeletonRows } from '@/components/shared/table-skeleton-rows';
 import { Button } from '@/components/ui/button';
@@ -344,19 +345,21 @@ export function DoctorManagement() {
                           >
                             <Edit className="size-4" aria-hidden="true" />
                           </Button>
-                          <Button
-                            aria-label={`Delete ${doctor.name}`}
-                            disabled={deleteMutation.isPending}
-                            onClick={() => {
-                              if (window.confirm(`Delete ${doctor.name}?`)) {
-                                deleteMutation.mutate(doctor._id);
-                              }
-                            }}
-                            size="icon-sm"
-                            variant="destructive"
+                          <DeleteConfirmationDialog
+                            title={`Delete ${doctor.name}?`}
+                            description="This doctor record will be permanently deleted. If the doctor still has assigned patients, the backend will block this action until those patients are removed or reassigned."
+                            isPending={deleteMutation.isPending}
+                            onConfirm={() => deleteMutation.mutate(doctor._id)}
                           >
-                            <Trash2 className="size-4" aria-hidden="true" />
-                          </Button>
+                            <Button
+                              aria-label={`Delete ${doctor.name}`}
+                              disabled={deleteMutation.isPending}
+                              size="icon-sm"
+                              variant="destructive"
+                            >
+                              <Trash2 className="size-4" aria-hidden="true" />
+                            </Button>
+                          </DeleteConfirmationDialog>
                         </div>
                       </TableCell>
                     </TableRow>

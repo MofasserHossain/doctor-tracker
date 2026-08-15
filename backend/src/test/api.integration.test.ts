@@ -582,18 +582,28 @@ describe("Doctor Tracker API", () => {
       expect(getDoctorId(createdPatient.doctorId)).toBe(seeded.doctors.dermatologist);
 
       const listResponse = await agent.get(`/api/v1/doctors/${seeded.doctors.dermatologist}/patients`).expect(200);
-      const listBody = listResponse.body as ServiceResponse<PatientRecord[]>;
+      const listBody = listResponse.body as ServiceResponse<CursorPage<PatientRecord>>;
 
-      expect(listBody.data.map((patient) => patient._id)).toEqual(expect.arrayContaining([createdPatient._id]));
+      expect(listBody.data.records.map((patient) => patient._id)).toEqual(expect.arrayContaining([createdPatient._id]));
+      expect(listBody.data.meta).toMatchObject({ limit: 10 });
+
+      const pagedResponse = await agent
+        .get(`/api/v1/doctors/${seeded.doctors.dermatologist}/patients`)
+        .query({ limit: 1 })
+        .expect(200);
+      const pagedBody = pagedResponse.body as ServiceResponse<CursorPage<PatientRecord>>;
+
+      expect(pagedBody.data.records).toHaveLength(1);
+      expect(pagedBody.data.meta).toMatchObject({ limit: 1 });
 
       await agent.delete(`/api/v1/doctors/${seeded.doctors.dermatologist}/patients/${createdPatient._id}`).expect(200);
 
       const afterDeleteResponse = await agent
         .get(`/api/v1/doctors/${seeded.doctors.dermatologist}/patients`)
         .expect(200);
-      const afterDeleteBody = afterDeleteResponse.body as ServiceResponse<PatientRecord[]>;
+      const afterDeleteBody = afterDeleteResponse.body as ServiceResponse<CursorPage<PatientRecord>>;
 
-      expect(afterDeleteBody.data.map((patient) => patient._id)).not.toContain(createdPatient._id);
+      expect(afterDeleteBody.data.records.map((patient) => patient._id)).not.toContain(createdPatient._id);
     });
   });
 });

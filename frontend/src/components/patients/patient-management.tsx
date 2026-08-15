@@ -2,6 +2,7 @@
 
 import { DoctorCombobox } from '@/components/doctors/doctor-combobox';
 import { PatientFormDialog } from '@/components/patients/patient-form-dialog';
+import { DeleteConfirmationDialog } from '@/components/shared/delete-confirmation-dialog';
 import { PaginationControls } from '@/components/shared/pagination-controls';
 import { TableSkeletonRows } from '@/components/shared/table-skeleton-rows';
 import { Badge } from '@/components/ui/badge';
@@ -387,19 +388,21 @@ export function PatientManagement() {
                             >
                               <Edit className="size-4" aria-hidden="true" />
                             </Button>
-                            <Button
-                              aria-label={`Delete ${patient.name}`}
-                              disabled={deleteMutation.isPending}
-                              onClick={() => {
-                                if (window.confirm(`Delete ${patient.name}?`)) {
-                                  deleteMutation.mutate(patient._id);
-                                }
-                              }}
-                              size="icon-sm"
-                              variant="destructive"
+                            <DeleteConfirmationDialog
+                              title={`Delete ${patient.name}?`}
+                              description="This patient record will be permanently deleted from the tracker."
+                              isPending={deleteMutation.isPending}
+                              onConfirm={() => deleteMutation.mutate(patient._id)}
                             >
-                              <Trash2 className="size-4" aria-hidden="true" />
-                            </Button>
+                              <Button
+                                aria-label={`Delete ${patient.name}`}
+                                disabled={deleteMutation.isPending}
+                                size="icon-sm"
+                                variant="destructive"
+                              >
+                                <Trash2 className="size-4" aria-hidden="true" />
+                              </Button>
+                            </DeleteConfirmationDialog>
                           </div>
                         </TableCell>
                       </TableRow>

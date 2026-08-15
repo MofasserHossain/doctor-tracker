@@ -10,6 +10,7 @@ import {
 import {
   createDoctorSchemaBody,
   getDoctorSchema,
+  queryDoctorPatientsSchema,
   queryDoctorsSchema,
   updateDoctorSchemaBody,
 } from "@/api/doctor/doctor.validation";
@@ -37,7 +38,11 @@ doctorRouter
 
 doctorRouter
   .route("/:id/patients")
-  .get(roleMiddleware("ADMIN"), validateRequest({ params: getDoctorSchema }), getPatientsByDoctor)
+  .get(
+    roleMiddleware("ADMIN"),
+    validateRequest({ params: getDoctorSchema, query: queryDoctorPatientsSchema }),
+    getPatientsByDoctor
+  )
   .post(
     roleMiddleware("ADMIN"),
     validateRequest({ params: getDoctorSchema, body: createPatientSchemaBody }),

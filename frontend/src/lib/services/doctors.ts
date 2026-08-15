@@ -8,6 +8,7 @@ import {
   getDoctorPatients,
   getDoctors,
   updateDoctor,
+  type DoctorPatientsQuery,
   type DoctorQuery,
 } from '@/lib/api/doctors';
 import { getApiErrorMessage } from '@/lib/api/error';
@@ -41,10 +42,14 @@ export const useDoctorComboboxQuery = (search: string, enabled: boolean) => {
   });
 };
 
-export const useDoctorPatientsQuery = (doctorId: string | undefined, enabled: boolean) => {
+export const useDoctorPatientsQuery = (
+  doctorId: string | undefined,
+  query: DoctorPatientsQuery,
+  enabled: boolean,
+) => {
   return useQuery({
-    queryKey: queryKeys.doctorPatients(doctorId),
-    queryFn: () => getDoctorPatients(doctorId ?? ''),
+    queryKey: queryKeys.doctorPatients(doctorId, query),
+    queryFn: () => getDoctorPatients(doctorId ?? '', query),
     enabled: enabled && Boolean(doctorId),
   });
 };
