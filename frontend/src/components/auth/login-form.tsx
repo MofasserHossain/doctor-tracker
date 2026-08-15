@@ -30,8 +30,8 @@ export function LoginForm() {
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: 'admin@doctortracker.local',
-      password: 'Admin@12345',
+      email: '',
+      password: '',
     },
   });
 

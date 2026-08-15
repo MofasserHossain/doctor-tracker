@@ -48,12 +48,14 @@ beforeEach(() => {
 });
 
 describe('LoginForm', () => {
-  it('submits the demo credentials and redirects to the requested next path', async () => {
+  it('submits entered credentials and redirects to the requested next path', async () => {
     const user = userEvent.setup();
     window.history.pushState({}, '', '/login?next=/patients');
 
     render(<LoginForm />);
 
+    await user.type(screen.getByLabelText(/email/i), 'admin@doctortracker.local');
+    await user.type(screen.getByLabelText(/password/i), 'Admin@12345');
     await user.click(screen.getByRole('button', { name: /sign in/i }));
 
     await waitFor(() => {
@@ -71,8 +73,6 @@ describe('LoginForm', () => {
 
     render(<LoginForm />);
 
-    await user.clear(screen.getByLabelText(/email/i));
-    await user.clear(screen.getByLabelText(/password/i));
     await user.type(screen.getByLabelText(/password/i), 'short');
     await user.click(screen.getByRole('button', { name: /sign in/i }));
 
