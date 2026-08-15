@@ -28,6 +28,7 @@ NEXT_PUBLIC_API_URL=http://localhost:4000/api/v1
 ```
 
 For deployment, set `NEXT_PUBLIC_API_URL` to the deployed backend URL plus `/api/v1`.
+Because this is a `NEXT_PUBLIC_*` variable, deploy the frontend again after changing it so Next.js bundles the new value.
 
 ## Local Development
 
