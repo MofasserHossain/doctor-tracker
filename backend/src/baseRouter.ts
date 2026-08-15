@@ -7,21 +7,23 @@ import patientRouter from "@/api/patient/patient.router";
 import seedRouter from "@/api/seed/seed.router";
 import { databaseConnectionMiddleware } from "@/common/db/db";
 import { apiRateLimit } from "@/common/middleware/security";
+import ApiError from "@/common/utils/ApiError";
 import { Router } from "express";
+import httpStatus from "http-status";
 
 const apiRouter = Router();
 
 apiRouter.use("/health-check", healthCheckRouter);
 
-apiRouter.use(databaseConnectionMiddleware);
-apiRouter.use("/auth", authRouter);
-apiRouter.use("/seed", seedRouter);
+apiRouter.use("/auth", databaseConnectionMiddleware, authRouter);
+apiRouter.use("/seed", databaseConnectionMiddleware, seedRouter);
 
-apiRouter.use(authMiddleware);
-apiRouter.use(apiRateLimit);
+apiRouter.use("/dashboard", databaseConnectionMiddleware, authMiddleware, apiRateLimit, dashboardRouter);
+apiRouter.use("/doctors", databaseConnectionMiddleware, authMiddleware, apiRateLimit, doctorRouter);
+apiRouter.use("/patients", databaseConnectionMiddleware, authMiddleware, apiRateLimit, patientRouter);
 
-apiRouter.use("/dashboard", dashboardRouter);
-apiRouter.use("/doctors", doctorRouter);
-apiRouter.use("/patients", patientRouter);
+apiRouter.use((_req, _res, next) => {
+  next(new ApiError(httpStatus.NOT_FOUND, "Not found"));
+});
 
 export default apiRouter;

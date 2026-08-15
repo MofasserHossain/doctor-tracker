@@ -274,6 +274,33 @@ afterAll(async () => {
 });
 
 describe("Doctor Tracker API", () => {
+  describe("health routes", () => {
+    it("returns health status on the health-check path", async () => {
+      const response = await request(app).get("/api/v1/health-check").expect(200);
+      const body = response.body as ServiceResponse<{
+        uptime: number;
+        timestamp: string;
+        database: string;
+      }>;
+
+      expect(body.success).toBe(true);
+      expect(body.message).toBe("Health check passed");
+      expect(body.data).toEqual({
+        uptime: expect.any(Number),
+        timestamp: expect.any(String),
+        database: expect.any(String),
+      });
+    });
+
+    it("returns not found for unsupported API routes", async () => {
+      const response = await request(app).get("/api/v1/health").expect(404);
+      const body = response.body as ErrorResponse;
+
+      expect(body.success).toBe(false);
+      expect(body.message).toBe("Not found");
+    });
+  });
+
   describe("auth routes", () => {
     it("rejects protected endpoints without a valid session", async () => {
       const response = await request(app).get("/api/v1/dashboard/summary").expect(401);

@@ -1,0 +1,11 @@
+FROM node:22-alpine
+
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm ci
+
+COPY . .
+RUN npm run build && npm prune --omit=dev
+
+CMD ["node", "-e", "import('./dist/index.js').then(({ default: app }) => { const port = Number(process.env.PORT ?? 3000); const host = process.env.HOST ?? '0.0.0.0'; const server = app.listen(port, host, () => console.log(`Server running on http://${host}:${port}`)); process.on('SIGTERM', () => server.close(() => process.exit(0))); })"]
