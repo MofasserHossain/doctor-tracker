@@ -11,6 +11,8 @@ import { Check, ChevronsUpDown, Search } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 type DoctorComboboxProps = {
+  'aria-describedby'?: string;
+  'aria-invalid'?: boolean;
   id?: string;
   value?: string;
   onValueChange: (value: string) => void;
@@ -24,6 +26,8 @@ type DoctorComboboxProps = {
 };
 
 export function DoctorCombobox({
+  'aria-describedby': ariaDescribedBy,
+  'aria-invalid': ariaInvalid,
   id,
   value,
   onValueChange,
@@ -103,8 +107,10 @@ export function DoctorCombobox({
           'w-full justify-between font-normal',
           !selectedDoctor && value !== allValue && 'text-muted-foreground',
         )}
+        aria-describedby={ariaDescribedBy}
         aria-expanded={open}
         aria-haspopup="listbox"
+        aria-invalid={ariaInvalid}
         disabled={disabled}
         onClick={() => setOpen((current) => !current)}
       >

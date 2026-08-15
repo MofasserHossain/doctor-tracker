@@ -185,6 +185,7 @@ export PORT="$backend_port"
 export CORS_ORIGIN="$public_frontend_url"
 export MONGODB_URI="$mongodb_uri"
 export NEXT_PUBLIC_API_URL="http://localhost:$backend_port/api/v1"
+export SEED_SECRET="dev-conductor-seed-secret-change-before-production"
 
 update_env_file backend/.env.dev \
   "NODE_ENV=development" \
@@ -193,6 +194,7 @@ update_env_file backend/.env.dev \
   "CORS_ORIGIN=$public_frontend_url" \
   "MONGODB_URI=$mongodb_uri" \
   "JWT_SECRET=dev-conductor-secret-change-before-production-32chars" \
+  "SEED_SECRET=dev-conductor-seed-secret-change-before-production" \
   "JWT_ACCESS_EXPIRATION_MINUTES=1440" \
   "BCRYPT_SALT_ROUNDS=12" \
   "AUTH_RATE_LIMIT_MAX=500" \

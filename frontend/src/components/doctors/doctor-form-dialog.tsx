@@ -1,5 +1,6 @@
 'use client';
 
+import { FieldError, getFieldErrorProps } from '@/components/shared/field-error';
 import { RequiredLabel } from '@/components/shared/required-label';
 import { Button } from '@/components/ui/button';
 import {
@@ -19,10 +20,30 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
 const doctorFormSchema = z.object({
-  name: z.string().trim().min(2, 'Name must be at least 2 characters').max(120),
-  specialization: z.string().trim().min(2, 'Specialization is required').max(120),
-  hospital: z.string().trim().min(2, 'Hospital is required').max(160),
-  phone: z.string().trim().min(6, 'Phone must be at least 6 characters').max(30),
+  name: z
+    .string()
+    .trim()
+    .min(1, 'Name is required')
+    .min(2, 'Name must be at least 2 characters')
+    .max(120, 'Name must be 120 characters or less'),
+  specialization: z
+    .string()
+    .trim()
+    .min(1, 'Specialization is required')
+    .min(2, 'Specialization must be at least 2 characters')
+    .max(120, 'Specialization must be 120 characters or less'),
+  hospital: z
+    .string()
+    .trim()
+    .min(1, 'Hospital is required')
+    .min(2, 'Hospital must be at least 2 characters')
+    .max(160, 'Hospital must be 160 characters or less'),
+  phone: z
+    .string()
+    .trim()
+    .min(1, 'Phone is required')
+    .min(6, 'Phone must be at least 6 characters')
+    .max(30, 'Phone must be 30 characters or less'),
   email: z.email('Enter a valid email'),
 });
 
@@ -54,6 +75,8 @@ export function DoctorFormDialog({
   const form = useForm<DoctorFormValues>({
     resolver: zodResolver(doctorFormSchema),
     defaultValues: emptyValues,
+    mode: 'onTouched',
+    reValidateMode: 'onChange',
   });
 
   useEffect(() => {
@@ -77,6 +100,7 @@ export function DoctorFormDialog({
   const handleSubmit = form.handleSubmit(async (values) => {
     await onSubmit(values);
   });
+  const errors = form.formState.errors;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -94,33 +118,43 @@ export function DoctorFormDialog({
           <div className="grid gap-4 md:grid-cols-2">
             <div className="grid gap-2">
               <RequiredLabel htmlFor="doctor-name">Name</RequiredLabel>
-              <Input id="doctor-name" autoComplete="name" {...form.register('name')} />
-              {form.formState.errors.name ? (
-                <p className="text-destructive text-sm">{form.formState.errors.name.message}</p>
-              ) : null}
+              <Input
+                id="doctor-name"
+                autoComplete="name"
+                {...getFieldErrorProps('doctor-name', errors.name?.message)}
+                {...form.register('name')}
+              />
+              <FieldError id="doctor-name-error">{errors.name?.message}</FieldError>
             </div>
             <div className="grid gap-2">
               <RequiredLabel htmlFor="doctor-specialization">Specialization</RequiredLabel>
-              <Input id="doctor-specialization" {...form.register('specialization')} />
-              {form.formState.errors.specialization ? (
-                <p className="text-destructive text-sm">
-                  {form.formState.errors.specialization.message}
-                </p>
-              ) : null}
+              <Input
+                id="doctor-specialization"
+                {...getFieldErrorProps('doctor-specialization', errors.specialization?.message)}
+                {...form.register('specialization')}
+              />
+              <FieldError id="doctor-specialization-error">
+                {errors.specialization?.message}
+              </FieldError>
             </div>
             <div className="grid gap-2">
               <RequiredLabel htmlFor="doctor-hospital">Hospital</RequiredLabel>
-              <Input id="doctor-hospital" {...form.register('hospital')} />
-              {form.formState.errors.hospital ? (
-                <p className="text-destructive text-sm">{form.formState.errors.hospital.message}</p>
-              ) : null}
+              <Input
+                id="doctor-hospital"
+                {...getFieldErrorProps('doctor-hospital', errors.hospital?.message)}
+                {...form.register('hospital')}
+              />
+              <FieldError id="doctor-hospital-error">{errors.hospital?.message}</FieldError>
             </div>
             <div className="grid gap-2">
               <RequiredLabel htmlFor="doctor-phone">Phone</RequiredLabel>
-              <Input id="doctor-phone" autoComplete="tel" {...form.register('phone')} />
-              {form.formState.errors.phone ? (
-                <p className="text-destructive text-sm">{form.formState.errors.phone.message}</p>
-              ) : null}
+              <Input
+                id="doctor-phone"
+                autoComplete="tel"
+                {...getFieldErrorProps('doctor-phone', errors.phone?.message)}
+                {...form.register('phone')}
+              />
+              <FieldError id="doctor-phone-error">{errors.phone?.message}</FieldError>
             </div>
             <div className="grid gap-2 md:col-span-2">
               <RequiredLabel htmlFor="doctor-email">Email</RequiredLabel>
@@ -128,11 +162,10 @@ export function DoctorFormDialog({
                 id="doctor-email"
                 type="email"
                 autoComplete="email"
+                {...getFieldErrorProps('doctor-email', errors.email?.message)}
                 {...form.register('email')}
               />
-              {form.formState.errors.email ? (
-                <p className="text-destructive text-sm">{form.formState.errors.email.message}</p>
-              ) : null}
+              <FieldError id="doctor-email-error">{errors.email?.message}</FieldError>
             </div>
           </div>
 
