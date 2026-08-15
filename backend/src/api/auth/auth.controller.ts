@@ -12,6 +12,7 @@ const getAccessTokenCookieOptions = (): CookieOptions => {
     sameSite: env.COOKIE_SAME_SITE as CookieOptions["sameSite"],
     secure: env.isProduction,
     maxAge: env.JWT_ACCESS_EXPIRATION_MINUTES * 60 * 1000,
+    ...(env.COOKIE_PARTITIONED ? { partitioned: true } : {}),
     ...(env.COOKIE_DOMAIN ? { domain: env.COOKIE_DOMAIN } : {}),
   };
 };
