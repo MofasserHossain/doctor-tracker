@@ -1,7 +1,7 @@
 import path from "node:path";
 
 import dotenv from "dotenv";
-import { cleanEnv, host, num, port, str, testOnly } from "envalid";
+import { bool, cleanEnv, host, num, port, str, testOnly } from "envalid";
 
 const envFile = process.env.NODE_ENV === "production" ? ".env.production" : ".env.dev";
 
@@ -25,6 +25,7 @@ export const env = cleanEnv(process.env, {
     default: "lax",
     choices: ["lax", "strict", "none"],
   }),
+  COOKIE_PARTITIONED: bool({ default: false }),
   BCRYPT_SALT_ROUNDS: num({ default: 12, devDefault: 4 }),
   AUTH_RATE_LIMIT_MAX: num({ default: 30, devDefault: 500 }),
   AUTH_RATE_LIMIT_WINDOW_MS: num({ default: 900000, devDefault: 900000 }),
