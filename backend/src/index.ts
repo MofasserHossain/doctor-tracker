@@ -34,4 +34,8 @@ const startServer = async () => {
   process.on("SIGTERM", () => void onCloseSignal());
 };
 
-void startServer();
+if (!process.env.VERCEL) {
+  void startServer();
+}
+
+export default app;
