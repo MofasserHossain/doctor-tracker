@@ -2,25 +2,12 @@
 
 Doctor Tracker is a secure admin application for Care Guide BD to manage doctors, their patients, and operational care metrics. It is built as two standalone applications: a Next.js frontend for the admin dashboard and an Express REST API backed by MongoDB/Mongoose.
 
-## Submission Links
-
-Fill these in after deployment:
-
-```text
-Frontend GitHub repository:
-Backend GitHub repository:
-Live frontend URL:
-Live backend API URL:
-```
-
-If this repository is submitted as a monorepo, the frontend source is in `frontend/` and the backend source is in `backend/`.
-
 ## Features
 
 - Admin authentication with JWT bearer/cookie support.
 - Doctor CRUD with search, filter, and cursor pagination.
 - Patient CRUD with doctor assignment, patient filtering, search, and cursor pagination.
-- Doctor detail API for listing patients under a selected doctor.
+- Doctor-patient listing with cursor pagination inside the selected doctor view.
 - Dashboard summary API with totals, patients per doctor, condition distribution, and date-based statistics.
 - Responsive admin UI built with Next.js, shadcn UI primitives, TanStack Query, React Hook Form, Zod, Recharts, and lucide icons.
 - Code quality tooling with `oxlint`, `oxfmt`, and `knip`.
@@ -32,7 +19,7 @@ If this repository is submitted as a monorepo, the frontend source is in `fronte
 ├── frontend/      # Next.js admin UI
 ├── backend/       # Express REST API with MongoDB/Mongoose
 ├── devservice/    # Local Docker Compose files
-├── docs/          # Submission screenshots and supporting documentation assets
+├── docs/          # Screenshots and supporting documentation assets
 ```
 
 Each application also has its own README:
@@ -62,13 +49,7 @@ individual app folders with `npm --prefix frontend ...` or `npm --prefix backend
 
 ### 2. Configure Environment Files
 
-Create the frontend env file:
-
-```bash
-cp frontend/.env.example frontend/.env.local
-```
-
-`frontend/.env.example`
+Create `frontend/.env.local`:
 
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:4000/api/v1
@@ -89,9 +70,11 @@ PORT=4000
 CORS_ORIGIN=http://localhost:3000
 MONGODB_URI=mongodb://doctor_tracker:doctor_tracker_password@127.0.0.1:27017/doctor_tracker?authSource=admin
 JWT_SECRET=replace-with-a-long-random-secret-at-least-32-characters
+SEED_SECRET=replace-with-a-long-random-seed-secret
 JWT_ACCESS_EXPIRATION_MINUTES=1440
 COOKIE_DOMAIN=
 COOKIE_SAME_SITE=lax
+COOKIE_PARTITIONED=false
 BCRYPT_SALT_ROUNDS=12
 AUTH_RATE_LIMIT_MAX=30
 AUTH_RATE_LIMIT_WINDOW_MS=900000
@@ -146,13 +129,14 @@ http://localhost:3000
 
 ## API Overview
 
-All protected routes require an authenticated admin.
+Doctor, patient, and dashboard routes require an authenticated admin. The seed endpoint requires the `x-seed-secret` header.
 
 ```text
 GET    /api/v1/health-check
 POST   /api/v1/auth/login
 POST   /api/v1/auth/logout
 GET    /api/v1/auth/me
+POST   /api/v1/seed
 GET    /api/v1/dashboard/summary
 GET    /api/v1/doctors
 POST   /api/v1/doctors
@@ -232,6 +216,6 @@ The repository uses `oxlint` for linting, `oxfmt` for formatting, and `knip` for
 ## Deployment Notes
 
 - Frontend: set `NEXT_PUBLIC_API_URL` to the deployed backend API origin plus `/api/v1`.
-- Backend: set `NODE_ENV=production`, `MONGODB_URI`, `JWT_SECRET`, and `CORS_ORIGIN` for the deployed frontend origin.
-- Auth cookies are `HttpOnly`. For different root domains, use HTTPS and set `COOKIE_SAME_SITE=none`; for same-site subdomains, `COOKIE_SAME_SITE=lax` is preferred. Set `COOKIE_DOMAIN` only when sharing a cookie across subdomains of the same parent domain.
-- Seed the first admin user before submitting or create an equivalent production admin account.
+- Backend: set `NODE_ENV=production`, `MONGODB_URI`, `JWT_SECRET`, `SEED_SECRET`, and `CORS_ORIGIN` for the deployed frontend origin.
+- Auth cookies are `HttpOnly`. For different root domains, use HTTPS and set `COOKIE_SAME_SITE=none`; if browser cookie partitioning is needed, set `COOKIE_PARTITIONED=true`. For same-site subdomains, `COOKIE_SAME_SITE=lax` is preferred. Set `COOKIE_DOMAIN` only when sharing a cookie across subdomains of the same parent domain.
+- Seed the first admin user before using the production app, or create an equivalent production admin account.
