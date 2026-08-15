@@ -80,6 +80,12 @@ type DashboardSummaryRecord = {
   }>;
 };
 
+type SeedSummaryRecord = {
+  adminEmail: string;
+  doctorCount: number;
+  patientCount: number;
+};
+
 type SeededData = {
   doctors: {
     cardiologist: string;
@@ -96,6 +102,7 @@ type SeededData = {
 
 const adminEmail = "admin@doctortracker.local";
 const adminPassword = "Admin@12345";
+const seedSecret = "test-seed-secret";
 
 let app: Express;
 let mongoServer: MongoMemoryServer;
@@ -240,6 +247,7 @@ beforeAll(async () => {
   process.env.NODE_ENV = "test";
   process.env.CORS_ORIGIN = "http://localhost:3000";
   process.env.JWT_SECRET = "test-jwt-secret-that-is-long-enough-for-tests";
+  process.env.SEED_SECRET = seedSecret;
   process.env.AUTH_RATE_LIMIT_MAX = "1000";
   process.env.API_RATE_LIMIT_MAX = "1000";
   process.env.BCRYPT_SALT_ROUNDS = "4";
@@ -310,6 +318,45 @@ describe("Doctor Tracker API", () => {
       const body = response.body as ErrorResponse;
 
       expect(body.message).toBe("Incorrect email or password");
+    });
+  });
+
+  describe("seed route", () => {
+    it("rejects requests without the seed secret", async () => {
+      const response = await request(app).post("/api/v1/seed").expect(401);
+      const body = response.body as ErrorResponse;
+
+      expect(body.message).toBe("Unauthorized");
+    });
+
+    it("rejects requests with an incorrect seed secret", async () => {
+      const response = await request(app).post("/api/v1/seed").set("x-seed-secret", "wrong-secret").expect(401);
+      const body = response.body as ErrorResponse;
+
+      expect(body.message).toBe("Unauthorized");
+    });
+
+    it("seeds the database with the correct secret without duplicating records", async () => {
+      await Promise.all([UserModel.deleteMany({}), DoctorModel.deleteMany({}), PatientModel.deleteMany({})]);
+
+      const firstResponse = await request(app).post("/api/v1/seed").set("x-seed-secret", seedSecret).expect(200);
+      const firstBody = firstResponse.body as ServiceResponse<SeedSummaryRecord>;
+
+      expect(firstBody.message).toBe("Seed completed");
+      expect(firstBody.data).toMatchObject({
+        adminEmail,
+        doctorCount: 12,
+        patientCount: 38,
+      });
+      await expect(UserModel.countDocuments()).resolves.toBe(1);
+      await expect(DoctorModel.countDocuments()).resolves.toBe(12);
+      await expect(PatientModel.countDocuments()).resolves.toBe(38);
+
+      await request(app).post("/api/v1/seed").set("x-seed-secret", seedSecret).expect(200);
+
+      await expect(UserModel.countDocuments()).resolves.toBe(1);
+      await expect(DoctorModel.countDocuments()).resolves.toBe(12);
+      await expect(PatientModel.countDocuments()).resolves.toBe(38);
     });
   });
 

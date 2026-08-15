@@ -30,6 +30,7 @@ PORT=4000
 CORS_ORIGIN=http://localhost:3000
 MONGODB_URI=mongodb://doctor_tracker:doctor_tracker_password@127.0.0.1:27017/doctor_tracker?authSource=admin
 JWT_SECRET=replace-with-a-long-random-secret-at-least-32-characters
+SEED_SECRET=replace-with-a-long-random-seed-secret
 JWT_ACCESS_EXPIRATION_MINUTES=1440
 COOKIE_DOMAIN=
 COOKIE_SAME_SITE=lax
@@ -119,7 +120,10 @@ Public routes:
 ```text
 GET  /api/v1/health-check
 POST /api/v1/auth/login
+POST /api/v1/seed
 ```
+
+`POST /api/v1/seed` requires the `x-seed-secret` header to match `SEED_SECRET`.
 
 Authenticated admin routes:
 
@@ -191,6 +195,7 @@ PORT=<provided by host or 4000>
 CORS_ORIGIN=<deployed frontend URL>
 MONGODB_URI=<MongoDB Atlas or hosted MongoDB URI>
 JWT_SECRET=<long random secret>
+SEED_SECRET=<long random secret for manual DB seeding>
 JWT_ACCESS_EXPIRATION_MINUTES=1440
 COOKIE_DOMAIN=<optional parent domain for same-site subdomains>
 COOKIE_SAME_SITE=<lax for same-site subdomains, none for different root domains over HTTPS>

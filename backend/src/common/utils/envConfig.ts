@@ -18,6 +18,7 @@ export const env = cleanEnv(process.env, {
   CORS_ORIGIN: str({ devDefault: testOnly("http://localhost:3000") }),
   MONGODB_URI: str({ devDefault: testOnly("mongodb://127.0.0.1:27017/doctor_tracker") }),
   JWT_SECRET: str({ devDefault: testOnly("dev-only-secret-change-before-production-32chars") }),
+  SEED_SECRET: str({ devDefault: testOnly("test-seed-secret") }),
   JWT_ACCESS_EXPIRATION_MINUTES: num({ devDefault: testOnly(1440) }),
   COOKIE_DOMAIN: str({ default: "" }),
   COOKIE_SAME_SITE: str({
