@@ -12,7 +12,12 @@ export type DoctorQuery = {
   to?: string;
 };
 
-const cleanParams = (params: DoctorQuery) => {
+export type DoctorPatientsQuery = {
+  cursor?: string;
+  limit?: number;
+};
+
+const cleanParams = (params: DoctorQuery | DoctorPatientsQuery) => {
   return Object.fromEntries(
     Object.entries(params).filter(([, value]) => value !== undefined && value !== ''),
   );
@@ -40,8 +45,13 @@ export const deleteDoctor = async (id: string) => {
   return response.data.data;
 };
 
-export const getDoctorPatients = async (doctorId: string) => {
-  const response = await http.get<ServiceResponse<Patient[]>>(`/doctors/${doctorId}/patients`);
+export const getDoctorPatients = async (doctorId: string, query: DoctorPatientsQuery = {}) => {
+  const response = await http.get<ServiceResponse<PaginatedResult<Patient>>>(
+    `/doctors/${doctorId}/patients`,
+    {
+      params: cleanParams(query),
+    },
+  );
   return response.data.data;
 };
 

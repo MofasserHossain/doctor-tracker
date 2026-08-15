@@ -29,7 +29,13 @@ export const queryDoctorsSchema = z.object({
   to: commonValidations.dateOnly.optional(),
 });
 
+export const queryDoctorPatientsSchema = z.object({
+  limit: commonValidations.limit,
+  cursor: commonValidations.cursor,
+});
+
 export type CreateDoctorSchemaBodyType = z.infer<typeof createDoctorSchemaBody>;
 export type UpdateDoctorSchemaBodyType = z.infer<typeof updateDoctorSchemaBody>;
 export type GetDoctorType = z.infer<typeof getDoctorSchema>;
 export type QueryDoctorsSchemaType = z.infer<typeof queryDoctorsSchema>;
+export type QueryDoctorPatientsSchemaType = z.infer<typeof queryDoctorPatientsSchema>;

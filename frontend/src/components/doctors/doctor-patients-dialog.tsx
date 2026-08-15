@@ -1,6 +1,8 @@
 'use client';
 
 import { PatientFormDialog } from '@/components/patients/patient-form-dialog';
+import { DeleteConfirmationDialog } from '@/components/shared/delete-confirmation-dialog';
+import { PaginationControls } from '@/components/shared/pagination-controls';
 import { TableSkeletonRows } from '@/components/shared/table-skeleton-rows';
 import { Button } from '@/components/ui/button';
 import {
@@ -26,7 +28,7 @@ import {
 } from '@/lib/services/doctors';
 import type { Doctor } from '@/types/domain';
 import { Plus, Trash2 } from 'lucide-react';
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 type DoctorPatientsDialogProps = {
   doctor?: Doctor;
@@ -36,16 +38,38 @@ type DoctorPatientsDialogProps = {
 
 export function DoctorPatientsDialog({ doctor, open, onOpenChange }: DoctorPatientsDialogProps) {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [limit, setLimit] = useState(5);
+  const [cursorStack, setCursorStack] = useState<(string | undefined)[]>([undefined]);
+  const [cursorIndex, setCursorIndex] = useState(0);
   const doctorId = doctor?._id;
-  const patientsQuery = useDoctorPatientsQuery(doctorId, open);
+  const currentCursor = cursorStack[cursorIndex];
+  const patientsQuery = useDoctorPatientsQuery(doctorId, { cursor: currentCursor, limit }, open);
+  const patientPage = patientsQuery.data;
+  const patients = patientPage?.records ?? [];
+  const meta = patientPage?.meta;
+
+  const resetPagination = useCallback(() => {
+    setCursorStack([undefined]);
+    setCursorIndex(0);
+  }, []);
+
+  useEffect(() => {
+    resetPagination();
+  }, [doctorId, open, resetPagination]);
+
   const createMutation = useCreateDoctorPatientMutation(doctorId, {
     onSuccess: () => {
       setIsCreateOpen(false);
+      resetPagination();
     },
   });
-  const deleteMutation = useDeleteDoctorPatientMutation(doctorId);
-
-  const patients = patientsQuery.data ?? [];
+  const deleteMutation = useDeleteDoctorPatientMutation(doctorId, {
+    onSuccess: () => {
+      if (patients.length === 1 && cursorIndex > 0) {
+        setCursorIndex((current) => Math.max(0, current - 1));
+      }
+    },
+  });
 
   return (
     <>
@@ -81,7 +105,9 @@ export function DoctorPatientsDialog({ doctor, open, onOpenChange }: DoctorPatie
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {patientsQuery.isLoading ? <TableSkeletonRows columnCount={6} rows={5} /> : null}
+                  {patientsQuery.isLoading ? (
+                    <TableSkeletonRows columnCount={6} rows={limit} />
+                  ) : null}
                   {!patientsQuery.isLoading && patients.length === 0 ? (
                     <TableRow>
                       <TableCell className="text-muted-foreground" colSpan={6}>
@@ -104,29 +130,55 @@ export function DoctorPatientsDialog({ doctor, open, onOpenChange }: DoctorPatie
                       <TableCell>{toTitleCase(patient.status)}</TableCell>
                       <TableCell>{formatDate(patient.visitDate)}</TableCell>
                       <TableCell className="text-right">
-                        <Button
-                          aria-label={`Remove ${patient.name}`}
-                          disabled={deleteMutation.isPending}
-                          onClick={() => {
-                            if (
-                              window.confirm(
-                                `Remove ${patient.name} from this doctor's patient list?`,
-                              )
-                            ) {
-                              deleteMutation.mutate(patient._id);
-                            }
-                          }}
-                          size="icon-sm"
-                          variant="destructive"
+                        <DeleteConfirmationDialog
+                          title={`Remove ${patient.name}?`}
+                          description="This will permanently delete this patient record from the doctor's patient list."
+                          confirmLabel="Remove"
+                          pendingLabel="Removing..."
+                          isPending={deleteMutation.isPending}
+                          onConfirm={() => deleteMutation.mutate(patient._id)}
                         >
-                          <Trash2 className="size-4" aria-hidden="true" />
-                        </Button>
+                          <Button
+                            aria-label={`Remove ${patient.name}`}
+                            disabled={deleteMutation.isPending}
+                            size="icon-sm"
+                            variant="destructive"
+                          >
+                            <Trash2 className="size-4" aria-hidden="true" />
+                          </Button>
+                        </DeleteConfirmationDialog>
                       </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
               </Table>
             </div>
+            <PaginationControls
+              meta={meta}
+              isFetching={patientsQuery.isFetching}
+              canGoBack={cursorIndex > 0}
+              pageLabel={`Page ${cursorIndex + 1} - showing ${patients.length} patient${
+                patients.length === 1 ? '' : 's'
+              }`}
+              onPrevious={() => {
+                setCursorIndex((current) => Math.max(0, current - 1));
+              }}
+              onNext={() => {
+                if (!meta?.nextCursor) {
+                  return;
+                }
+
+                setCursorStack((current) => [
+                  ...current.slice(0, cursorIndex + 1),
+                  meta.nextCursor ?? undefined,
+                ]);
+                setCursorIndex((current) => current + 1);
+              }}
+              onLimitChange={(nextLimit) => {
+                setLimit(nextLimit);
+                resetPagination();
+              }}
+            />
           </div>
         </DialogContent>
       </Dialog>
